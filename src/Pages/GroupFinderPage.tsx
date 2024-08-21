@@ -16,6 +16,10 @@ const GroupFinderPage: React.FC = () => {
   // const [lab_group_data, setLabGroup] = useState<Student[]>(lab_group);
 
   const handleSearch = (value: string) => {
+    if (value === "") {
+      setResult(null);
+      return;
+    }
     const searchResult = lab_group.filter(
       (student) =>
         student.student_id.toString().includes(value) ||
@@ -35,8 +39,8 @@ const GroupFinderPage: React.FC = () => {
           onSearch={handleSearch}
         />
         <div className="">
-          {result ? (
-            result.map((item, index) => (
+          {result?.length != 0 ? (
+            result?.map((item, index) => (
               <p key={index} className="text-lg text-center mt-4">
                 <span className="font-bold">Group Number:</span>{" "}
                 {item.group_number}
