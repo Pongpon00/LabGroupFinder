@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Input, Select, Table, TableProps } from "antd";
+import { lab_group } from "./Assignment2Group";
 
 const { Search } = Input;
 
@@ -8,10 +9,6 @@ interface Student {
   student_id: number;
   student_name: string;
 }
-
-type LabGroupType =
-  | { lab_group_1: Student[]; lab_group_2?: undefined }
-  | { lab_group_2: Student[]; lab_group_1?: undefined };
 
 const columns: TableProps<Student>["columns"] = [
   {
@@ -36,36 +33,31 @@ const columns: TableProps<Student>["columns"] = [
 ];
 
 const GroupFinderPage: React.FC = () => {
-  const assignmentOptions = [{ label: "Assignment 2", value: "Assignment 2" }];
-
   const groupOptions = Array.from({ length: 20 }, (_, i) => ({
     label: `Group ${i + 1}`,
     value: i + 1,
   }));
 
-  const [result, setResult] = useState<Student[] | null>(null);
+  const [result, setResult] = useState<Student[]>([]);
+  const [searchedStudent, setSearchedStudent] = useState<Student | null>(null);
   const [onSearch, setOnSearch] = useState<string>("");
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
-  const [labGroupData, setLabGroupData] = useState<LabGroupType | null>(null);
+  const [selectedGroupMembers, setSelectedGroupMembers] = useState<Student[]>([]);
 
   const handleGroupSelect = (value: number | undefined) => {
-    if (value === undefined) {
-      setSelectedGroup(null);
-      setResult(null);
-      return;
-    }
-    setSelectedGroup(value);
+    setSelectedGroup(value || null);
+    setOnSearch(""); // Clear any existing search input
+    
 
-    if (labGroupData?.lab_group_1) {
-      const filtered = labGroupData.lab_group_1.filter(
+    if (value !== undefined) {
+      const filtered = lab_group.filter(
         (item) => item.group_number === value
       );
       setResult(filtered);
-    } else if (labGroupData?.lab_group_2) {
-      const filtered = labGroupData.lab_group_2.filter(
-        (item) => item.group_number === value
-      );
-      setResult(filtered);
+      setSearchedStudent(null); // Clear any existing searched student
+      setOnSearch(""); // Clear any existing search input
+    } else {
+      setResult([]);
     }
   };
 
@@ -73,20 +65,48 @@ const GroupFinderPage: React.FC = () => {
     setOnSearch(value);
     setSelectedGroup(null); // Clear group selection when searching by name or ID
 
-    if (labGroupData?.lab_group_1) {
-      const filtered = labGroupData.lab_group_1.filter(
+    // Find the student based on the search criteria
+    const foundStudent = lab_group.find(
+      (item) =>
+        item.student_id.toString().includes(value) ||
+        item.student_name.toLowerCase().includes(value.toLowerCase())
+    );
+
+    const result = lab_group.filter(
+      (item) =>
+        item.student_id.toString().includes(value) ||
+        item.student_name.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setSelectedGroupMembers(result);
+
+    if(selectedGroup !== null && value !== "") {
+      // filter student name or ID in the selected group
+      const groupMembers = lab_group.filter(
+        (item) => item.group_number === selectedGroup
+      );
+      const filteredGroupMembers = groupMembers.filter(
         (item) =>
           item.student_id.toString().includes(value) ||
           item.student_name.toLowerCase().includes(value.toLowerCase())
       );
-      setResult(filtered);
-    } else if (labGroupData?.lab_group_2) {
-      const filtered = labGroupData.lab_group_2.filter(
-        (item) =>
-          item.student_id.toString().includes(value) ||
-          item.student_name.toLowerCase().includes(value.toLowerCase())
+      setResult(filteredGroupMembers);
+    }
+    else if (selectedGroup === null && value === "") {
+      setResult(result);
+      setSearchedStudent(null); // Clear the searched student if the search input is empty
+    }
+    else if (foundStudent && selectedGroup === null) {
+      // Get all members of the found student's group
+      setSearchedStudent(foundStudent);
+      const groupMembers = lab_group.filter(
+        (item) => item.group_number === foundStudent.group_number
       );
-      setResult(filtered);
+      setResult(groupMembers);
+    } 
+    else {
+      setResult([]);
+      setSearchedStudent(null); // Clear the searched student if not found
     }
   };
 
@@ -96,32 +116,27 @@ const GroupFinderPage: React.FC = () => {
       <div className="flex flex-col justify-center items-center gap-y-4">
         <div className="flex flex-col sm:flex-row gap-x-4 gap-y-4 w-3/4 sm:w-1/2 justify-center items-center">
           <Select
-            className="flex w-full"
-            size="large"
-            allowClear
-            placeholder="Select Assignment"
-            options={assignmentOptions}
-          />
-          <Select
-            disabled={onSearch !== ""} // Disable if there's any search input
+            // disabled={onSearch !== ""} // Disable if there's any search input
             className="flex w-full"
             size="large"
             allowClear
             placeholder="Select Group"
             options={groupOptions}
             onChange={handleGroupSelect}
+            // value={selectedGroup}
           />
         </div>
         <Search
-          disabled={selectedGroup !== null} // Disable if a group is selected
+          // disabled={selectedGroup !== null} // Disable if a group is selected
           className="w-3/4 sm:w-1/2"
           size="large"
           placeholder="Enter your student ID or name"
+          value={onSearch}
           onSearch={handleOnSearch}
           onChange={(e) => handleOnSearch(e.target.value)}
         />
         <div className="w-3/4 sm:w-1/2 overflow-scroll bg-slate-200 rounded-xl">
-          {result && (
+          {result.length > 0 && (
             <Table
               className="p-2"
               columns={columns}
@@ -129,6 +144,12 @@ const GroupFinderPage: React.FC = () => {
               pagination={false}
               scroll={{ y: 420 }}
               rowKey="student_id"
+              // Highlight the row if it matches the searched student
+              rowClassName={(record) =>
+                searchedStudent && record.student_id === searchedStudent.student_id
+                  ? "bg-yellow-300"
+                  : ""
+              }
             />
           )}
         </div>
