@@ -42,7 +42,7 @@ const GroupFinderPage: React.FC = () => {
   const [searchedStudent, setSearchedStudent] = useState<Student | null>(null);
   const [onSearch, setOnSearch] = useState<string>("");
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
-  const [selectedGroupMembers, setSelectedGroupMembers] = useState<Student[]>([]);
+  // const [selectedGroupMembers, setSelectedGroupMembers] = useState<Student[]>([]);
 
   const handleGroupSelect = (value: number | undefined) => {
     setSelectedGroup(value || null);
@@ -78,7 +78,7 @@ const GroupFinderPage: React.FC = () => {
         item.student_name.toLowerCase().includes(value.toLowerCase())
     );
 
-    setSelectedGroupMembers(result);
+    // setSelectedGroupMembers(result);
 
     if(selectedGroup !== null && value !== "") {
       // filter student name or ID in the selected group
