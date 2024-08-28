@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Input, Select, Table, TableProps } from "antd";
-import { lab_group } from "./Assignment2Group";
 
 const { Search } = Input;
 
@@ -10,17 +9,23 @@ interface Student {
   student_name: string;
 }
 
+type LabGroupType =
+  | { lab_group_1: Student[]; lab_group_2?: undefined }
+  | { lab_group_2: Student[]; lab_group_1?: undefined };
+
 const columns: TableProps<Student>["columns"] = [
   {
     title: "Group Number",
     dataIndex: "group_number",
     key: "group_number",
+    width: 150,
   },
   {
-    title: "student ID",
+    title: "Student ID",
     dataIndex: "student_id",
     key: "student_id",
     render: (text) => <a>{text}</a>,
+    width: 200,
   },
   {
     title: "Name",
@@ -41,41 +46,57 @@ const GroupFinderPage: React.FC = () => {
   const [result, setResult] = useState<Student[] | null>(null);
   const [onSearch, setOnSearch] = useState<string>("");
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
+  const [labGroupData, setLabGroupData] = useState<LabGroupType | null>(null);
 
-  const handleGroupSelect = (value: number) => {
+  const handleGroupSelect = (value: number | undefined) => {
     if (value === undefined) {
       setSelectedGroup(null);
       setResult(null);
       return;
-    } else {
-      setSelectedGroup(value);
-      const filtered = lab_group.filter(
-        (item) => item.lab_group_2 && item.lab_group_2[0].group_number === value
+    }
+    setSelectedGroup(value);
+
+    if (labGroupData?.lab_group_1) {
+      const filtered = labGroupData.lab_group_1.filter(
+        (item) => item.group_number === value
       );
       setResult(filtered);
-      console.log(filtered);
+    } else if (labGroupData?.lab_group_2) {
+      const filtered = labGroupData.lab_group_2.filter(
+        (item) => item.group_number === value
+      );
+      setResult(filtered);
     }
   };
 
   const handleOnSearch = (value: string) => {
     setOnSearch(value);
     setSelectedGroup(null); // Clear group selection when searching by name or ID
-    const filtered = lab_group_2.filter(
-      (item) =>
-        item.student_id.toString().includes(value) ||
-        item.student_name.toLowerCase().includes(value.toLowerCase())
-    );
-    setResult(filtered);
-    console.log(filtered);
+
+    if (labGroupData?.lab_group_1) {
+      const filtered = labGroupData.lab_group_1.filter(
+        (item) =>
+          item.student_id.toString().includes(value) ||
+          item.student_name.toLowerCase().includes(value.toLowerCase())
+      );
+      setResult(filtered);
+    } else if (labGroupData?.lab_group_2) {
+      const filtered = labGroupData.lab_group_2.filter(
+        (item) =>
+          item.student_id.toString().includes(value) ||
+          item.student_name.toLowerCase().includes(value.toLowerCase())
+      );
+      setResult(filtered);
+    }
   };
 
   return (
     <div className="flex flex-col justify-center w-full min-h-screen">
       <p className="text-4xl font-bold text-center py-6">Group Finder</p>
       <div className="flex flex-col justify-center items-center gap-y-4">
-        <div className=" flex flex-col sm:flex-row gap-x-4 gap-y-4 w-3/4 sm:w-1/2 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-x-4 gap-y-4 w-3/4 sm:w-1/2 justify-center items-center">
           <Select
-            className=" flex w-full"
+            className="flex w-full"
             size="large"
             allowClear
             placeholder="Select Assignment"
@@ -83,7 +104,7 @@ const GroupFinderPage: React.FC = () => {
           />
           <Select
             disabled={onSearch !== ""} // Disable if there's any search input
-            className=" flex w-full"
+            className="flex w-full"
             size="large"
             allowClear
             placeholder="Select Group"
@@ -99,13 +120,15 @@ const GroupFinderPage: React.FC = () => {
           onSearch={handleOnSearch}
           onChange={(e) => handleOnSearch(e.target.value)}
         />
-        <div className=" w-2/3 overflow-scroll">
+        <div className="w-3/4 sm:w-1/2 overflow-scroll bg-slate-200 rounded-xl">
           {result && (
             <Table
+              className="p-2"
               columns={columns}
               dataSource={result}
               pagination={false}
               scroll={{ y: 420 }}
+              rowKey="student_id"
             />
           )}
         </div>
