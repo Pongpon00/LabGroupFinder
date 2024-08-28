@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Select, Table, TableProps } from "antd";
+import { Input, Table, TableProps } from "antd";
 import { lab_group } from "./Assignment2Group";
 
 const { Search } = Input;
@@ -33,10 +33,10 @@ const columns: TableProps<Student>["columns"] = [
 ];
 
 const GroupFinderPage: React.FC = () => {
-  const groupOptions = Array.from({ length: 20 }, (_, i) => ({
-    label: `Group ${i + 1}`,
-    value: i + 1,
-  }));
+  // const groupOptions = Array.from({ length: 20 }, (_, i) => ({
+  //   label: `Group ${i + 1}`,
+  //   value: i + 1,
+  // }));
 
   const [result, setResult] = useState<Student[]>([]);
   const [searchedStudent, setSearchedStudent] = useState<Student | null>(null);
@@ -44,22 +44,22 @@ const GroupFinderPage: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
   // const [selectedGroupMembers, setSelectedGroupMembers] = useState<Student[]>([]);
 
-  const handleGroupSelect = (value: number | undefined) => {
-    setSelectedGroup(value || null);
-    setOnSearch(""); // Clear any existing search input
+  // const handleGroupSelect = (value: number | undefined) => {
+  //   setSelectedGroup(value || null);
+  //   setOnSearch(""); // Clear any existing search input
     
 
-    if (value !== undefined) {
-      const filtered = lab_group.filter(
-        (item) => item.group_number === value
-      );
-      setResult(filtered);
-      setSearchedStudent(null); // Clear any existing searched student
-      setOnSearch(""); // Clear any existing search input
-    } else {
-      setResult([]);
-    }
-  };
+  //   if (value !== undefined) {
+  //     const filtered = lab_group.filter(
+  //       (item) => item.group_number === value
+  //     );
+  //     setResult(filtered);
+  //     setSearchedStudent(null); // Clear any existing searched student
+  //     setOnSearch(""); // Clear any existing search input
+  //   } else {
+  //     setResult([]);
+  //   }
+  // };
 
   const handleOnSearch = (value: string) => {
     setOnSearch(value);
@@ -115,7 +115,7 @@ const GroupFinderPage: React.FC = () => {
       <p className="text-4xl font-bold text-center py-6">Group Finder</p>
       <div className="flex flex-col justify-center items-center gap-y-4">
         <div className="flex flex-col sm:flex-row gap-x-4 gap-y-4 w-3/4 sm:w-1/2 justify-center items-center">
-          <Select
+          {/* <Select
             // disabled={onSearch !== ""} // Disable if there's any search input
             className="flex w-full"
             size="large"
@@ -124,7 +124,7 @@ const GroupFinderPage: React.FC = () => {
             options={groupOptions}
             onChange={handleGroupSelect}
             // value={selectedGroup}
-          />
+          /> */}
         </div>
         <Search
           // disabled={selectedGroup !== null} // Disable if a group is selected
